@@ -7,11 +7,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+func helloWorld(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello World!"))
+}
+
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
-	})
+	r.Get("/", helloWorld)
 	http.ListenAndServe(":3000", r)
 }
