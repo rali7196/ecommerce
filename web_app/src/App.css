@@ -1,0 +1,10 @@
+.flexContainerColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.flexContainerRow {
+    display: flex;
+    flex-direction: row;
+}
