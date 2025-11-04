@@ -24,7 +24,13 @@ function App() {
         <Button
           onClick={() => {
             ApiGatewayClient.helloWorld()
-              .then((response) => response.json())
+              .then((response) => {
+                if (response == null) {
+                  return;
+                }
+
+                return response.json();
+              })
               .then((json) => console.log(json));
           }}
         >

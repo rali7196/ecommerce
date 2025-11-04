@@ -21,7 +21,7 @@ export default class ApiGatewayClient {
   //   return
   // }
 
-  static async helloWorld(): Promise<any>{
+  static async helloWorld(): Promise<Response | void> {
     const requestInit: RequestInit = {
       method: "GET",
       headers: {

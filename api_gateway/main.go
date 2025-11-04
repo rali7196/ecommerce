@@ -5,38 +5,55 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"github.com/rali7196/ecommerce/api_gateway/authentication"
 )
 
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("received hello world request")
-	response := map[string]string{"message": "Hello World!"}
+type structResponse struct {
+	response string
+}
+
+func testHandler(w http.ResponseWriter, r *http.Request) {
+	response := structResponse{"Hello World"}
 	responseJson, err := json.Marshal(response)
+
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+
 	}
+	w.WriteHeader(http.StatusOK)
 	w.Write(responseJson)
 }
 
-func main() {
-	r := chi.NewRouter()
-	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"https://*", "http://*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
-	r.Use(middleware.Logger)
-	r.Get("/", helloWorld)
-	fmt.Println("Starting server on port 3000")
-	err := http.ListenAndServe(":3000", r)
-	if err != nil {
-		panic(err)
+func CorsMiddleware(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		next.ServeHTTP(w, r)
 	}
+}
+
+func LoggingMiddleware(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Received Request")
+		next.ServeHTTP(w, r)
+	}
+}
+
+func ApplyMiddleware(handler http.HandlerFunc) http.HandlerFunc {
+	middlewares := []func(http.Handler) http.HandlerFunc{
+		CorsMiddleware, LoggingMiddleware}
+
+	finalHandler := handler
+	for _, middleware := range middlewares {
+		finalHandler = middleware(finalHandler)
+	}
+
+	return finalHandler
+}
+
+func main() {
+	authentication.Test()
+	fmt.Println("Starting server on port 3000")
+	http.HandleFunc("/", ApplyMiddleware(testHandler))
+	http.ListenAndServe(":3000", nil)
 }
