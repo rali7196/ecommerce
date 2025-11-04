@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: rehan
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecommerce_data:/var/lib/postgresql
+volumes:
+  ecommerce_data:
