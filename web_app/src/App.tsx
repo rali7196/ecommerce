@@ -3,40 +3,44 @@ import "./App.css";
 import { useState } from "react";
 import "./internal/ApiClient.ts";
 import ApiGatewayClient from "./internal/ApiClient.ts";
+import type CreateUserResponse from "./types/responses/createUserResponse.ts";
 
 function App() {
-  const [userName, setUserName] = useState<String>("");
-  const [password, setPassword] = useState<String>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  function createAccountCallback() {
+    return (response: void | CreateUserResponse) => {
+      if (response == null) {
+        return;
+      }
+
+      console.log(response);
+    };
+  }
 
   return (
     <>
       <div className={"flexContainerColumn"}>
         <TextField
           placeholder={"Username"}
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         ></TextField>
         <TextField
           placeholder={"Password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         ></TextField>
-        <Button
-          onClick={() => {
-            ApiGatewayClient.helloWorld()
-              .then((response) => {
-                if (response == null) {
-                  return;
-                }
-
-                return response.json();
-              })
-              .then((json) => console.log(json));
-          }}
-        >
+        <Button>
           Log In
         </Button>
-        <Button>Sign Up</Button>
+        <Button onClick={ () => {
+          ApiGatewayClient.createAccount(email, password).then(
+            createAccountCallback()
+          )
+        }
+        }>Sign Up</Button>
       </div>
     </>
   );
