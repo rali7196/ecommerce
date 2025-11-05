@@ -10,9 +10,10 @@ import (
 
 func main() {
 	fmt.Println("Starting server on port 3000")
-	http.Handle("/", middleware.ApplyMiddleware(func(writer http.ResponseWriter, r *http.Request) {
 
-	}))
-	http.Handle("POST /users", middleware.ApplyMiddleware(controllers.CreateUser))
-	http.ListenAndServe(":3000", nil)
+	mux := http.NewServeMux()
+	var uc controllers.UserController
+	uc.RegisterRoutes(mux)
+
+	http.ListenAndServe(":3000", middleware.ApplyMiddleware(mux))
 }
